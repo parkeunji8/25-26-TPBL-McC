@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>맥컬러 온코트 데이터 · 네트워크 분석 설계서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16233A; --paper:#F6F7F9; --panel:#FFFFFF; --line:#D8DDE5;
+  --muted:#5B6878; --teal:#0E7C71; --teal-soft:#E3F2EF;
+  --amber:#A86F00; --amber-soft:#FBF1DC; --rose:#B23A55; --rose-soft:#F8E4E9;
+  --slate-soft:#EBEEF3;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#E6EAF0; --paper:#10161F; --panel:#172030; --line:#2B3647;
+    --muted:#9AA6B6; --teal:#4FC2B3; --teal-soft:#15312F;
+    --amber:#E6B24A; --amber-soft:#35291A; --rose:#E77F97; --rose-soft:#3A1E27;
+    --slate-soft:#1E2838;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E6EAF0; --paper:#10161F; --panel:#172030; --line:#2B3647;
+  --muted:#9AA6B6; --teal:#4FC2B3; --teal-soft:#15312F;
+  --amber:#E6B24A; --amber-soft:#35291A; --rose:#E77F97; --rose-soft:#3A1E27;
+  --slate-soft:#1E2838;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
+header h1{font-size:1.9rem;line-height:1.25;margin:0 0 10px;font-weight:700;letter-spacing:-0.01em}
+header p{margin:0;color:var(--muted);max-width:68ch}
+.facts{display:flex;flex-wrap:wrap;gap:28px;margin:24px 0 32px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts div{font-size:.88rem;color:var(--muted)}
+.facts b{display:block;font-size:1.25rem;color:var(--ink);font-weight:700}
+
+/* tabs */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.tab{appearance:none;border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink);
+  text-align:left;padding:14px 16px;cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:4px;position:relative}
+.tab:last-child{border-right:0}
+.tab .fname{font-weight:700;font-size:.92rem;word-break:break-all;line-height:1.35}
+.tab .sub{font-size:.8rem;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--slate-soft)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--teal)}
+.tab:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.verdict{display:inline-block;font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:999px;width:max-content}
+.v-good{background:var(--teal-soft);color:var(--teal)}
+.v-cond{background:var(--amber-soft);color:var(--amber)}
+.v-aux{background:var(--slate-soft);color:var(--muted);border:1px solid var(--line)}
+.v-bad{background:var(--rose-soft);color:var(--rose)}
+
+/* panels */
+.panel{margin-top:28px}
+.panel[hidden]{display:none}
+.lead{display:grid;grid-template-columns:1fr 220px;gap:32px;align-items:start;margin-bottom:12px}
+.lead h2{font-size:1.45rem;margin:0 0 8px;line-height:1.3}
+.lead p{margin:0 0 10px;max-width:66ch}
+.glyph{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.glyph svg{width:100%;height:auto;display:block}
+.glyph figcaption{font-size:.78rem;color:var(--muted);margin-top:6px;line-height:1.45}
+
+section.block{display:grid;grid-template-columns:170px 1fr;gap:28px;padding:26px 0;border-top:1px solid var(--line)}
+section.block h3{font-size:1rem;margin:0;line-height:1.4}
+section.block h3 small{display:block;font-weight:400;color:var(--muted);font-size:.8rem;margin-top:2px}
+.body p{margin:0 0 12px;max-width:70ch}
+.body ul{margin:0 0 12px;padding-left:1.2em;max-width:70ch}
+.body li{margin-bottom:6px}
+.body h4{font-size:.95rem;margin:18px 0 6px}
+.body h4:first-child{margin-top:0}
+code{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--slate-soft);padding:1px 5px;border-radius:4px}
+.formula{display:block;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--teal);padding:10px 14px;border-radius:6px;margin:8px 0 14px;font-size:.9rem;overflow-x:auto}
+.tbl{overflow-x:auto;margin:6px 0 14px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:520px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;color:var(--muted);font-size:.82rem;background:var(--slate-soft)}
+td.n{white-space:nowrap}
+.note{background:var(--amber-soft);border-radius:8px;padding:12px 16px;margin:6px 0 12px;font-size:.92rem;max-width:70ch}
+.note b{color:var(--amber)}
+.outputs{counter-reset:o;list-style:none;padding-left:0 !important}
+.outputs li{padding:10px 0 10px 0;border-bottom:1px dashed var(--line);margin:0}
+.outputs li:last-child{border-bottom:0}
+.outputs li b{display:block}
+.outputs li span{color:var(--muted);font-size:.9rem}
+.goal{margin:8px 0 4px;padding:22px 24px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px}
+.goal h3{margin:0 0 6px;font-size:1.05rem}
+.goal .q{font-size:1.15rem;font-weight:700;line-height:1.5;margin:0 0 12px;max-width:62ch}
+.goal p{margin:0 0 10px;max-width:70ch}
+.goal .ex{list-style:none;padding:0;margin:4px 0 0}
+.goal .ex li{padding:8px 12px;margin-bottom:6px;background:var(--teal-soft);border-radius:6px;font-size:.93rem}
+.goal .ex li::before{content:"\201C";color:var(--teal);font-weight:700;margin-right:2px}
+.goal .ex li::after{content:"\201D";color:var(--teal);font-weight:700;margin-left:2px}
+.goal .map{font-size:.88rem;color:var(--muted);margin-top:10px}
+.overall{margin:0 0 28px;padding:18px 22px;border-radius:10px;background:var(--slate-soft)}
+.overall h2{font-size:1.1rem;margin:0 0 8px}
+.overall p{margin:0 0 8px;max-width:72ch}
+.overall ol{margin:6px 0 0;padding-left:1.3em;max-width:72ch}
+.overall li{margin-bottom:4px}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+
+@media (max-width:780px){
+  .tabs{grid-template-columns:1fr 1fr}
+  .tab:nth-child(2){border-right:0}
+  .tab:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .lead{grid-template-columns:1fr}
+  .glyph{max-width:260px}
+  section.block{grid-template-columns:1fr;gap:10px}
+  header h1{font-size:1.5rem}
+}
+@media (prefers-reduced-motion:no-preference){
+  .panel:not([hidden]){animation:in .22s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>맥컬러 온코트 데이터로 할 수 있는 네트워크 분석</h1>
+  <p>TPBL 25-26 시즌, 크리스 맥컬러가 출전한 24경기에서 만든 CSV 4개를 기준으로 파일마다 어떤 그래프를 만들 수 있고, 엣지를 무엇으로 정의하며, 어떤 방법으로 분석해 무엇을 산출할지 정리했습니다. 수치는 업로드된 CSV에서 직접 계산한 값입니다.</p>
+</header>
+
+<div class="facts" aria-label="데이터 개요">
+  <div><b>24경기</b>맥컬러 출전</div>
+  <div><b>약 684분</b>맥컬러 온코트 시간</div>
+  <div><b>+6.6</b>온코트 36분당 득실(기준선)</div>
+  <div><b>670분</b>외국인 동료가 정확히 1명이던 시간</div>
+</div>
+
+<div class="overall">
+  <h2>전체 최종 목적: 맥컬러와 가장 좋은 조합 찾기</h2>
+  <p>네 파일은 각자 다른 질문을 맡고, 마지막에 하나의 궁합 스코어카드로 합쳐집니다. 모든 스틴트에 맥컬러가 포함되어 있으므로 네트워크에서 <b>노드 하나는 "맥컬러 + 그 선수" 2인 조합</b>, <b>엣지 하나는 "맥컬러 + 두 선수" 3인 조합</b>을 뜻합니다.</p>
+  <ol>
+    <li>스틴트: 맥컬러와 가장 좋은 2인·3인 조합은 누구인가</li>
+    <li>우리팀 fit: 맥컬러와 잘 맞는 선수는 어떤 유형인가</li>
+    <li>우리팀 온코트: 누가 맥컬러 본인의 플레이를 가장 살려주는가</li>
+    <li>상대팀 온코트: 위 결론이 상대가 약해서 생긴 착시는 아닌가</li>
+  </ol>
+</div>
+
+<div class="tabs" role="tablist" aria-label="데이터 파일">
+  <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true">
+    <span class="fname">mcc_lineup_stints</span>
+    <span class="sub">716 스틴트</span>
+    <span class="verdict v-good">핵심 데이터</span>
+  </button>
+  <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1">
+    <span class="fname">mcc_우리팀_fit</span>
+    <span class="sub">14명 요약</span>
+    <span class="verdict v-cond">노드 속성용</span>
+  </button>
+  <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1">
+    <span class="fname">mcc_oncourt_stats_우리팀</span>
+    <span class="sub">124 출전 구간</span>
+    <span class="verdict v-aux">보조 데이터</span>
+  </button>
+  <button class="tab" role="tab" id="t4" aria-controls="p4" aria-selected="false" tabindex="-1">
+    <span class="fname">mcc_oncourt_stats_상대팀</span>
+    <span class="sub">상대 선수 105명</span>
+    <span class="verdict v-bad">통제 변수용</span>
+  </button>
+</div>
+
+<!-- ============ TAB 1 ============ -->
+<div class="panel" role="tabpanel" id="p1" aria-labelledby="t1">
+  <div class="lead">
+    <div>
+      <h2>라인업 스틴트: 공존 네트워크와 성과 네트워크의 원천</h2>
+      <p>선수 교체가 일어나기 전까지의 구간마다 코트 위 동료 명단과 득실이 있어서, 두 선수가 함께 뛴 시간과 그때의 득실을 바로 계산할 수 있는 유일한 파일입니다. 네트워크 분석의 중심이 되는 데이터입니다.</p>
+      <p>함께 뛴 기록이 있는 쌍은 가능한 91쌍 중 69쌍이며, 공존 30분 이상이 35쌍, 100분 이상이 16쌍입니다.</p>
+    </div>
+    <figure class="glyph">
+      <svg viewBox="0 0 200 130" role="img" aria-label="선수와 스틴트의 이분 그래프를 선수 네트워크로 투영하는 모식도">
+        <g stroke="var(--line)" stroke-width="1.4">
+          <line x1="22" y1="22" x2="72" y2="45"/><line x1="22" y1="22" x2="72" y2="85"/>
+          <line x1="22" y1="64" x2="72" y2="45"/><line x1="22" y1="64" x2="72" y2="85"/>
+          <line x1="22" y1="106" x2="72" y2="85"/>
+        </g>
+        <g fill="var(--teal)"><circle cx="22" cy="22" r="7"/><circle cx="22" cy="64" r="7"/><circle cx="22" cy="106" r="7"/></g>
+        <g fill="var(--muted)"><rect x="66" y="39" width="12" height="12" rx="2"/><rect x="66" y="79" width="12" height="12" rx="2"/></g>
+        <path d="M95 65 H118" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#ar)"/>
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+        <g stroke="var(--teal)" stroke-width="4" stroke-linecap="round"><line x1="150" y1="30" x2="175" y2="75"/></g>
+        <g stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><line x1="150" y1="30" x2="140" y2="100"/><line x1="175" y1="75" x2="140" y2="100"/></g>
+        <g fill="var(--teal)"><circle cx="150" cy="30" r="7"/><circle cx="175" cy="75" r="7"/><circle cx="140" cy="100" r="7"/></g>
+      </svg>
+      <figcaption>선수(원)–스틴트(사각형) 이분 그래프를 선수끼리의 가중 그래프로 투영</figcaption>
+    </figure>
+  </div>
+
+  <div class="goal">
+    <h3>최종 목적</h3>
+    <p class="q">맥컬러와 가장 좋은 2인 조합과 3인 조합을 찾는다.</p>
+    <p>노드 지표로 "맥컬러 + A" 2인 조합의 순위를, 엣지 지표로 "맥컬러 + A + B" 3인 조합의 순위를 매깁니다. 외국인 파트너는 3명 중 1명만 뛸 수 있으므로 "맥컬러의 최적 외국인 파트너"는 따로 결론을 냅니다.</p>
+    <ul class="ex">
+      <li>맥컬러와 뛸 때 A가 수축 득실 기준 가장 좋은 2인 조합이며, 경기 부트스트랩 구간도 기준선 위에 있다.</li>
+      <li>맥컬러 + A + B 3인 조합은 코치가 가장 자주 묶고(lift 최고) 성과도 가장 좋은 검증된 조합이다.</li>
+      <li>맥컬러 + C + D는 자주 쓰이지 않지만 성과가 좋은 과소 활용 조합이다.</li>
+      <li>외국인 파트너 중에서는 X와 함께일 때 맥컬러 라인업 성과가 가장 높다.</li>
+    </ul>
+    <p class="map">근거가 되는 산출물: 쌍별 궁합 표, 로테이션 네트워크 그림, 3인 조합 표, QAP 결과</p>
+  </div>
+
+  <section class="block">
+    <h3>그래프 정의<small>무엇을 노드로 두는가</small></h3>
+    <div class="body">
+      <h4>맥컬러의 에고 네트워크</h4>
+      <p>모든 스틴트에 맥컬러가 포함되어 있으므로 이 데이터는 맥컬러를 중심으로 한 에고 네트워크입니다. 맥컬러를 노드로 넣으면 모든 선수와 연결된 허브가 되어 정보가 없으므로 노드에서 제외하고, "맥컬러가 코트에 있을 때 동료 간 관계"로 해석합니다.</p>
+      <h4>이분 그래프 → 선수 투영</h4>
+      <p>원형은 선수–스틴트 이분 그래프이고, 이를 선수 쪽으로 투영해 무방향 가중 그래프를 만듭니다. 노드는 맥컬러와 함께 뛴 동료 14명입니다. 투영 과정에서 5인 라인업이라는 집단 정보가 2인 관계로 쪼개지므로, 3인 조합 분석으로 이를 보완합니다.</p>
+      <h4>외국인 파트너별 층 분리</h4>
+      <p>맥컬러 온코트 시간의 대부분(670분) 동안 외국인 동료가 정확히 1명(Kromah, Miller, Diallo 중 하나)이었습니다. 이 셋은 서로 연결될 수 없는 구조이므로, 전체 그래프 외에 외국인 파트너별로 부분 그래프를 따로 만들어 "어떤 외국인 파트너인가"와 "어떤 국내 선수 3명인가"를 두 층으로 분리해 봅니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>엣지 정의<small>세 종류의 엣지</small></h3>
+    <div class="body">
+      <div class="tbl"><table>
+        <thead><tr><th>엣지</th><th>가중치</th><th>그래프 유형</th><th>용도와 한계</th></tr></thead>
+        <tbody>
+          <tr><td class="n">공존</td><td>lift (기대 대비 관측 공존시간)</td><td>무방향 가중</td><td>코치의 로테이션 의도. 가장 안정적이지만 궁합이 아니라 선택을 보여줌</td></tr>
+          <tr><td class="n">성과</td><td>수축된 36분당 득실</td><td>무방향 부호</td><td>궁합에 가장 직접적. 노이즈가 커서 공존 100분 이상 쌍만 사용 권장</td></tr>
+          <tr><td class="n">3인 조합</td><td>3인 공존 성과 − 쌍 효과 합</td><td>삼자 관계</td><td>역할 중복 같은 고차 효과 확인용</td></tr>
+        </tbody>
+      </table></div>
+      <h4>공존 엣지: 원시 시간 대신 lift</h4>
+      <p>원시 공존시간은 출전시간이 많은 선수끼리 커질 수밖에 없으므로 기대값으로 나눕니다.</p>
+      <code class="formula">lift(A,B) = 공존시간(A,B) ÷ ( A 출전시간 × B 출전시간 ÷ 맥컬러 전체 온코트 시간 )</code>
+      <p>1보다 크면 의도적으로 함께 쓰는 조합, 1보다 작으면 의도적으로 분리하는 조합입니다. 외국인 선수 간 lift는 규칙상 0입니다.</p>
+      <h4>성과 엣지: 수축 적용</h4>
+      <code class="formula">수축 득실(A,B) = ( 공존 득실 + 기준선 6.6/36분 × k ) ÷ ( 공존시간 + k ) × 36</code>
+      <p>k는 30~50분에서 시작합니다. 공존시간이 짧은 쌍일수록 기준선 쪽으로 당겨져 극단값이 억제됩니다. 양수와 음수가 공존하므로 부호 네트워크로 다룹니다.</p>
+      <h4>엣지 정리</h4>
+      <p>공존 30분 미만 엣지는 제거하는 임계값 방식이 기본입니다. 출전이 적은 선수의 상대적으로 중요한 연결을 살리려면 disparity filter 같은 백본 추출을 병행합니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>방법론<small>측정과 검증</small></h3>
+    <div class="body">
+      <h4>노드 지표</h4>
+      <ul>
+        <li><b>강도</b>: 맥컬러 옆에서 가장 많이 쓰이는 선수.</li>
+        <li><b>고유벡터 중심성</b>: 핵심 로테이션 그룹 소속 정도.</li>
+        <li><b>매개 중심성</b>: 주전 조합과 벤치 조합을 잇는 연결고리 선수. 가중치를 거리로 변환(<code>distance = 1 / lift</code>)한 뒤 계산.</li>
+        <li><b>양·음 엣지 강도 분리</b>(성과 네트워크): 누구와 붙어도 좋은 선수와 특정 선수와만 좋은 선수를 구분.</li>
+      </ul>
+      <h4>엣지 교차 분류</h4>
+      <p>쌍마다 공존 lift, 수축 성과, 부트스트랩 구간을 나란히 놓고 분류합니다. lift가 높고 성과도 좋으면 검증된 조합, lift가 낮은데 성과가 좋으면 과소 활용된 조합, lift가 높은데 성과가 나쁘면 재검토 조합입니다.</p>
+      <h4>중간 구조</h4>
+      <ul>
+        <li><b>코어–주변부</b>(Borgatti–Everett): 농구 로테이션 구조에 잘 맞고 선수별 코어성 점수가 연속값이라 소표본에서 안정적. 우선 적용.</li>
+        <li><b>Leiden 커뮤니티 탐지</b>: resolution 값을 여러 개로 바꿔 결과 변화를 확인. 외국인 선수 제약 때문에 "외국인 파트너별 유닛"이 인공적으로 생길 수 있으므로 반드시 귀무 모델과 비교.</li>
+        <li><b>구조적 균형</b>(성과 네트워크): 삼각형 단위로 양·음 엣지 조합이 일관적인지 검사.</li>
+      </ul>
+      <h4>통계적 검증</h4>
+      <ul>
+        <li><b>공존 귀무 모델</b>: 각 선수 출전시간, 스틴트 인원 수, 외국인 1명 규칙을 보존한 채 경기 내에서 외국인은 외국인끼리, 국내는 국내끼리 배정을 섞어 가짜 네트워크를 수백 개 생성. 실제 lift와 커뮤니티 모듈성이 이 분포의 어디에 있는지 확인.</li>
+        <li><b>성과 귀무 모델</b>: 라인업은 고정하고 스틴트 득실만 경기 내에서 섞음. "조합 때문인가, 그 시간대 때문인가"를 검증.</li>
+        <li><b>경기 단위 블록 부트스트랩</b>: 24경기를 복원추출해 네트워크를 재구성. 중심성 순위는 Spearman 상관, 커뮤니티 배정은 ARI로 안정성 측정.</li>
+        <li><b>QAP 상관</b>: 공존 lift 행렬과 성과 행렬의 관련성을 행·열 동시 순열로 검정. "코치가 자주 묶는 조합이 실제로 성과도 좋은가"에 대한 답.</li>
+      </ul>
+      <h4>3인 조합 분석</h4>
+      <p>3인 조합별 성과를 쌍 효과의 합으로 기대되는 값과 비교합니다. 예를 들어 공격형 국내 선수 3명(Lin Sin-Kuan, Gao Jin-Wei, Tsao Xun-Xiang)이 맥컬러와 모두 함께 뛴 57분은 36분당 0.0(90% 구간 −19.4 ~ 17.4)으로, 1명일 때(+9.4)나 2명일 때(+6.3)보다 낮습니다. 구간이 넓어 확정할 수 없지만 역할 중복 가설로 검증할 가치가 있습니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>산출물<small>최종적으로 만들 것</small></h3>
+    <div class="body">
+      <ul class="outputs">
+        <li><b>로테이션 네트워크 그림</b><span>노드 크기는 출전시간, 노드 색은 스타일 유형(탭 2), 엣지 두께는 lift, 엣지 색은 수축 성과. 외국인 파트너별 3장 추가.</span></li>
+        <li><b>lift 히트맵</b><span>14×14 행렬, 귀무 모델 대비 유의한 칸 표시.</span></li>
+        <li><b>쌍별 궁합 표</b><span>공존시간, lift, 수축 득실, 90% 구간, 교차 분류(검증/과소 활용/재검토).</span></li>
+        <li><b>중심성 순위표</b><span>강도, 고유벡터, 매개, 코어성 점수와 부트스트랩 순위 안정성.</span></li>
+        <li><b>커뮤니티·코어 구조 결과</b><span>귀무 모델 대비 모듈성, resolution별 배정 변화.</span></li>
+        <li><b>QAP 결과</b><span>공존과 성과의 상관계수와 순열 p값.</span></li>
+        <li><b>3인 조합 표</b><span>공존 20분 이상 3인 조합의 성과, 쌍 효과 대비 차이, 구간.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>전처리와 주의점</h3>
+    <div class="body">
+      <div class="note"><b>정리 필요</b> 음수 시간 스틴트 10건(최소 −1.6분, In/Out 순서 뒤집힘 추정, 득실은 모두 0), 시간 0 스틴트 32건, 동료가 3명만 기록된 스틴트 92건(22.3분, 교체 누락 추정), 상대 선수가 0명 또는 4명인 스틴트 96건.</div>
+      <p>스틴트의 62%가 1분 미만인 것은 상대팀 교체로도 구간이 끊기기 때문이라 쌍 단위 집계에는 문제가 없지만, 스틴트 자체를 분석 단위로 쓰는 것은 피합니다.</p>
+      <p>스틴트별 포제션이나 팀 스탯이 없어 100포제션당 Net Rating과 Four Factors는 이 파일만으로 계산할 수 없습니다. 원본 pbp에서 스틴트 구간별로 재집계하면 성과 엣지를 포제션 기준으로 바꿀 수 있습니다.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TAB 2 ============ -->
+<div class="panel" role="tabpanel" id="p2" aria-labelledby="t2" hidden>
+  <div class="lead">
+    <div>
+      <h2>우리팀 fit: 노드 속성과 스타일 유사도 네트워크</h2>
+      <p>선수 14명이 맥컬러와 함께 뛸 때의 누적 스탯과 per36 값을 담은 요약표입니다. 쌍 정보가 없어서 이 파일만으로 공존·성과 엣지는 만들 수 없지만, 노드에 붙일 속성과 스타일 유사도 엣지의 원천이 됩니다.</p>
+      <p>출전 10분 미만 3명(Ting Kuang-Hao, Huang Jhen, Liu Yuan-Kai)은 per36이 의미가 없고, 실사용 가능한 선수는 80분 이상 기준 10명입니다.</p>
+    </div>
+    <figure class="glyph">
+      <svg viewBox="0 0 200 130" role="img" aria-label="속성에 따라 색이 다른 노드와 유사도 엣지 모식도">
+        <g stroke="var(--line)" stroke-width="1.6" stroke-dasharray="3 3">
+          <line x1="40" y1="35" x2="85" y2="60"/><line x1="85" y1="60" x2="55" y2="100"/>
+          <line x1="130" y1="30" x2="165" y2="65"/><line x1="165" y1="65" x2="140" y2="105"/>
+          <line x1="85" y1="60" x2="130" y2="30"/>
+        </g>
+        <circle cx="40" cy="35" r="10" fill="var(--teal)"/>
+        <circle cx="85" cy="60" r="13" fill="var(--teal)"/>
+        <circle cx="55" cy="100" r="7" fill="var(--amber)"/>
+        <circle cx="130" cy="30" r="9" fill="var(--rose)"/>
+        <circle cx="165" cy="65" r="11" fill="var(--rose)"/>
+        <circle cx="140" cy="105" r="6" fill="var(--amber)"/>
+      </svg>
+      <figcaption>색은 스타일 유형, 크기는 공존시간, 점선은 스타일 유사도 엣지</figcaption>
+    </figure>
+  </div>
+
+  <div class="goal">
+    <h3>최종 목적</h3>
+    <p class="q">맥컬러와 잘 맞는 선수 유형과 유형 구성을 찾는다.</p>
+    <p>개별 선수 결론은 출전시간에 따라 흔들리지만, 유형으로 묶으면 여러 선수의 표본이 합쳐져 더 안정적인 결론을 낼 수 있습니다. 탭 1의 선수 단위 결론을 일반화하는 역할입니다.</p>
+    <ul class="ex">
+      <li>맥컬러에게 가장 잘 맞는 파트너 유형은 롤 플레이어형이다.</li>
+      <li>맥컬러와 공격형 국내 선수를 셋 다 같이 쓰면 역할이 겹쳐 성과가 떨어지는 경향이 있다.</li>
+      <li>코치는 맥컬러 옆에 비슷한 스타일보다 보완적인 스타일을 묶어 쓰고 있다.</li>
+    </ul>
+    <p class="map">근거가 되는 산출물: 유형 구성별 성과 표, 스타일 맵, assortativity와 QAP 결과</p>
+  </div>
+
+  <section class="block">
+    <h3>그래프 정의</h3>
+    <div class="body">
+      <h4>역할 1: 탭 1 네트워크의 노드 속성표</h4>
+      <p>스틴트 네트워크의 노드(선수)에 붙일 속성을 제공합니다. 공존시간은 노드 크기, 스타일 유형은 노드 색, 선수별 36분당 득실과 구간은 노드 테두리나 라벨로 씁니다.</p>
+      <h4>역할 2: 스타일 유사도 네트워크</h4>
+      <p>노드는 출전 80분 이상 선수 10명, 엣지는 스타일 특성 벡터 간 유사도인 무방향 가중 그래프입니다. 이 그래프 자체보다는 탭 1의 공존 네트워크와 비교하는 데 가치가 있습니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>엣지 정의</h3>
+    <div class="body">
+      <p>표준화한 스타일 특성 벡터의 코사인 유사도를 엣지 가중치로 두고, 각 선수에게서 가장 가까운 2~3명만 연결하는 kNN 그래프로 정리합니다.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>특성</th><th>계산</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>3점 시도 비율</td><td class="n"><code>3P_A / (2P_A + 3P_A)</code></td><td>슈팅 스타일</td></tr>
+          <tr><td>사용량 추정</td><td class="n"><code>(FGA + 0.44·FT_A + TOV) / 분 × 36</code></td><td>공격 비중</td></tr>
+          <tr><td>어시스트·리바운드·블록</td><td>per36</td><td>역할</td></tr>
+          <tr><td>자유투 획득률</td><td class="n"><code>FT_A / FGA</code></td><td>림 공략 성향</td></tr>
+        </tbody>
+      </table></div>
+      <p>슈팅 성공률(2P_PCT, 3P_PCT)은 시도가 적은 선수가 있어(Diallo 3점 시도 1개, Tung Yung-Chuan 12개) 특성에서 제외합니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>방법론</h3>
+    <div class="body">
+      <h4>스타일 유형 정의</h4>
+      <p>위 특성으로 Ward 계층 클러스터링을 하면 k=3에서 실루엣 0.33(무작위 기준선 95% 값 0.29), 경기 부트스트랩 ARI 중앙값 0.66으로 약하지만 우연보다 나은 구조가 나옵니다.</p>
+      <ul>
+        <li><b>외국인</b>: Lasan Kromah, Malcolm Miller, Cheick Diallo</li>
+        <li><b>공격형 국내</b>: Lin Sin-Kuan, Gao Jin-Wei, Tsao Xun-Xiang</li>
+        <li><b>롤 플레이어</b>: Chuang Po-Yuan, Wang Hao-Chi, Tung Yung-Chuan, Hsu Hong-Wei</li>
+      </ul>
+      <p>k=2는 외국인과 국내로만 나뉘어 정보가 없고, k=4는 무작위 기준선과 차이가 없으므로 3개 유형까지만 사용합니다.</p>
+      <h4>동류 선호 분석</h4>
+      <p>탭 1 공존 네트워크에서 같은 유형끼리 더 자주 연결되는지 assortativity 계수로 측정합니다. 외국인 유형은 규칙상 서로 연결될 수 없으므로 국내 선수 부분 그래프에서 계산합니다.</p>
+      <h4>스타일 유사도 대 공존 QAP</h4>
+      <p>스타일 유사도 행렬과 공존 lift 행렬의 QAP 상관으로 "코치가 비슷한 스타일끼리 묶는가, 보완적인 스타일끼리 묶는가"를 검증합니다. 음의 상관이면 보완형 로테이션입니다.</p>
+      <h4>유형 구성별 성과</h4>
+      <p>스틴트마다 유형별 인원 수를 세어 성과를 비교합니다. 현재는 공격형 국내 1명 +9.4, 2명 +6.3, 3명 0.0이지만 구간이 모두 겹치므로 가설로만 제시합니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>산출물</h3>
+    <div class="body">
+      <ul class="outputs">
+        <li><b>노드 속성표</b><span>선수, 공존시간, 스타일 유형, 36분당 득실, 90% 구간. 탭 1 그림의 범례로 사용.</span></li>
+        <li><b>스타일 맵</b><span>3점 시도 비율과 사용량을 두 축으로 한 연속 공간 배치, 점 색은 득실, 크기는 공존시간. 네트워크 레이아웃의 대안 좌표로도 사용.</span></li>
+        <li><b>스타일 유사도 kNN 그래프</b><span>유형 경계에 걸친 선수를 시각적으로 확인.</span></li>
+        <li><b>assortativity와 QAP 결과</b><span>유사 스타일 선호인지 보완 스타일 선호인지에 대한 수치.</span></li>
+        <li><b>유형 구성별 성과 표</b><span>유형 인원 조합별 공존시간, 득실, 구간.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>전처리와 주의점</h3>
+    <div class="body">
+      <div class="note"><b>해석 주의</b> 이 파일의 스탯은 "맥컬러와 함께 뛸 때의 기록"이라 선수 본연의 스타일과 맥컬러 효과가 섞여 있습니다. 가능하면 스타일 특성은 원본 경기 전체 기록(맥컬러 OFF 포함)으로 다시 계산하고, 맥컬러 ON 기록은 성과 표시에만 쓰는 편이 깔끔합니다.</div>
+      <p><code>Team_Score</code>는 누적 합이라 출전시간으로 나눠 36분당 값으로 바꿔 씁니다. 스틴트 파일로 재계산한 값과 거의 일치(예: Lin Sin-Kuan 472.8분 대 477.6분)해 정합성은 양호합니다.</p>
+      <p>per36 값은 출전시간에 비례한 수축을 적용한 뒤 특성으로 사용합니다.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TAB 3 ============ -->
+<div class="panel" role="tabpanel" id="p3" aria-labelledby="t3" hidden>
+  <div class="lead">
+    <div>
+      <h2>우리팀 온코트 스탯: 맥컬러 중심 별형 네트워크와 재표본 원천</h2>
+      <p>맥컬러가 코트에 들어가서 나올 때까지의 구간(24경기 124개) 단위로 동료 선수별 스탯을 기록한 파일입니다. 한 구간 안에 동료가 4~13명 등장해 여러 라인업이 섞여 있으므로 라인업 단위 엣지에는 맞지 않지만, 맥컬러 본인의 기록을 파트너별로 비교하는 데 쓸 수 있습니다.</p>
+    </div>
+    <figure class="glyph">
+      <svg viewBox="0 0 200 130" role="img" aria-label="맥컬러를 중심으로 한 별형 네트워크 모식도">
+        <g stroke="var(--teal)" stroke-linecap="round">
+          <line x1="100" y1="65" x2="40" y2="28" stroke-width="4"/>
+          <line x1="100" y1="65" x2="160" y2="25" stroke-width="2"/>
+          <line x1="100" y1="65" x2="170" y2="95" stroke-width="5"/>
+          <line x1="100" y1="65" x2="45" y2="105" stroke-width="1.5"/>
+          <line x1="100" y1="65" x2="100" y2="115" stroke-width="3"/>
+        </g>
+        <circle cx="100" cy="65" r="14" fill="var(--ink)"/>
+        <g fill="var(--teal)"><circle cx="40" cy="28" r="7"/><circle cx="160" cy="25" r="7"/><circle cx="170" cy="95" r="7"/><circle cx="45" cy="105" r="7"/><circle cx="100" cy="115" r="7"/></g>
+      </svg>
+      <figcaption>중심은 맥컬러, 엣지 굵기는 파트너가 있을 때 맥컬러 기록의 변화</figcaption>
+    </figure>
+  </div>
+
+  <div class="goal">
+    <h3>최종 목적</h3>
+    <p class="q">맥컬러 본인의 플레이를 가장 살려주는 파트너를 찾는다.</p>
+    <p>탭 1이 "함께 뛸 때 팀이 잘했는가"를 본다면, 이 탭은 "함께 뛸 때 맥컬러가 잘했는가"를 봅니다. 과정 지표라 득실보다 빨리 안정되므로, 탭 1 결론을 뒷받침하는 가장 강한 보조 근거가 됩니다.</p>
+    <ul class="ex">
+      <li>A와 함께 뛸 때 맥컬러의 TS%가 가장 높고 턴오버가 가장 적다.</li>
+      <li>맥컬러에게 가장 많이 어시스트하는 선수는 B이며, 맥컬러와 B는 양방향 연계가 강한 조합이다.</li>
+      <li>탭 1에서 좋았던 A 조합은 맥컬러 기록 향상과 어시스트 연결로도 확인된다.</li>
+    </ul>
+    <p class="map">근거가 되는 산출물: 파트너별 맥컬러 기록 표, 별형 네트워크 그림, 방향 어시스트 네트워크, 궁합 스코어카드</p>
+  </div>
+
+  <section class="block">
+    <h3>그래프 정의</h3>
+    <div class="body">
+      <h4>맥컬러 별형 네트워크</h4>
+      <p>탭 1과 반대로 맥컬러를 중심 노드로 두고, 동료들은 맥컬러와만 연결된 별(star) 구조입니다. 동료 간 엣지는 두지 않습니다. 질문은 "누가 맥컬러를 살려주는가"입니다.</p>
+      <h4>방향 어시스트 네트워크 (확장)</h4>
+      <p>이 CSV에는 어시스트 횟수만 있고 누가 누구에게 줬는지는 없습니다. <code>translated_games</code> 원문에서 어시스트 주고받은 선수 쌍을 다시 파싱하면 방향 그래프를 만들 수 있고, 새 크롤링은 필요 없습니다. 이 파일은 파싱 결과의 검증 기준(선수별 어시스트 합계)으로 씁니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>엣지 정의</h3>
+    <div class="body">
+      <div class="tbl"><table>
+        <thead><tr><th>엣지</th><th>가중치</th><th>방향</th></tr></thead>
+        <tbody>
+          <tr><td>맥컬러 → 파트너</td><td>파트너가 함께 기록된 구간에서 맥컬러의 득점 per36, 슈팅 효율(TS%), 턴오버 per36과 전체 평균의 차이</td><td>무방향(별형)</td></tr>
+          <tr><td>어시스트 A → B</td><td>A가 B의 득점을 도운 횟수 ÷ 두 선수 공존시간 × 36</td><td>방향</td></tr>
+        </tbody>
+      </table></div>
+      <code class="formula">TS% = PTS ÷ ( 2 × ( FGA + 0.44 × FT_A ) )</code>
+      <p>파트너가 구간의 일부만 뛰었을 수 있으므로, 구간별 가중치를 탭 1 스틴트 데이터로 계산한 실제 공존 비율로 보정하면 귀속 오차가 줄어듭니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>방법론</h3>
+    <div class="body">
+      <h4>과정 지표 비교</h4>
+      <p>득실은 노이즈가 크지만 슈팅 효율, 턴오버, 슛 시도 빈도 같은 과정 지표는 적은 표본에서도 비교적 빨리 안정됩니다. 파트너별로 맥컬러의 이 지표들이 기준선 대비 어떻게 변하는지 보고 구간을 붙입니다.</p>
+      <h4>경기 단위 재표본 원천</h4>
+      <p>이 파일에는 경기 날짜와 구간 번호가 있어서, 탭 2의 선수 스탯을 경기 단위로 재집계하는 부트스트랩의 원천 데이터로 씁니다. 스타일 유형 안정성(ARI) 계산도 이 파일로 수행했습니다.</p>
+      <h4>어시스트 네트워크 지표</h4>
+      <ul>
+        <li><b>입·출 강도</b>: 맥컬러에게 가장 많이 주는 선수, 맥컬러가 가장 많이 주는 선수.</li>
+        <li><b>상호성</b>: A→B와 B→A가 모두 강한 쌍은 양방향 연계가 있는 조합.</li>
+        <li><b>귀무 모델</b>: 선수별 어시스트 수와 득점 수를 보존한 채 연결만 섞은 방향 구성 모델과 비교.</li>
+      </ul>
+      <h4>교차 확인</h4>
+      <p>탭 1의 성과 엣지, 이 탭의 맥컬러 기록 변화, 어시스트 연결이 같은 선수를 가리키는지 확인합니다. 신호 하나하나는 약해도 방향이 일치하면 궁합 결론의 근거가 됩니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>산출물</h3>
+    <div class="body">
+      <ul class="outputs">
+        <li><b>맥컬러 별형 네트워크 그림</b><span>파트너별로 맥컬러 TS%, 득점, 턴오버 변화를 엣지 색과 굵기로 표시.</span></li>
+        <li><b>파트너별 맥컬러 기록 표</b><span>지표별 기준선 대비 차이와 경기 부트스트랩 구간.</span></li>
+        <li><b>방향 어시스트 네트워크</b><span>원문 재파싱 후 생성. 맥컬러 입·출 강도와 상호성 표 포함.</span></li>
+        <li><b>궁합 스코어카드</b><span>선수별로 성과 엣지, 맥컬러 기록 변화, 어시스트 연결을 한 표에 모아 신호 일치 여부 표시.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>전처리와 주의점</h3>
+    <div class="body">
+      <div class="note"><b>귀속 한계</b> 한 구간에 최대 13명까지 기록되어 있어 파트너가 실제로 맥컬러와 함께 뛴 시간이 구간 길이보다 짧을 수 있습니다. 탭 1 스틴트로 실제 공존시간을 계산해 가중하지 않으면 출전 비중이 작은 파트너의 효과가 부풀려집니다.</div>
+      <p>시간 표기가 스틴트 파일(<code>Q1 7:14</code>)과 이 파일(<code>Q1 05:08</code>)에서 다르므로 두 파일을 시각으로 결합하기 전에 초 단위로 통일합니다.</p>
+      <p>이 파일에는 스탯을 기록한 선수만 등장할 수 있어, 해당 구간에 뛰었지만 기록이 없는 선수가 빠졌을 가능성이 있습니다. 출전 여부 판단은 스틴트 파일을 기준으로 합니다.</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TAB 4 ============ -->
+<div class="panel" role="tabpanel" id="p4" aria-labelledby="t4" hidden>
+  <div class="lead">
+    <div>
+      <h2>상대팀 온코트 스탯: 선수 단위 분석은 부적합, 맥락 통제용</h2>
+      <p>맥컬러 출전 구간 동안 상대 선수들의 스탯입니다. 상대 선수 105명이 평균 2.5경기(최대 5경기)만 등장하고, 상대 선수별 출전시간 정보도 없어서 "맥컬러 상대로 누가 잘하는가" 같은 선수 단위 네트워크는 성립하지 않습니다.</p>
+      <p>대신 상대팀 단위로 묶거나 상대 라인업의 강도를 추정해, 탭 1 성과 엣지를 보정하는 통제 변수로 쓰는 것이 현실적인 활용법입니다.</p>
+    </div>
+    <figure class="glyph">
+      <svg viewBox="0 0 200 130" role="img" aria-label="우리 유형과 상대 유형 사이의 희소한 이분 그래프 모식도">
+        <g stroke="var(--line)" stroke-width="1.4">
+          <line x1="40" y1="30" x2="160" y2="40"/><line x1="40" y1="65" x2="160" y2="40"/>
+          <line x1="40" y1="65" x2="160" y2="95"/><line x1="40" y1="100" x2="160" y2="95"/>
+        </g>
+        <g fill="var(--teal)"><circle cx="40" cy="30" r="8"/><circle cx="40" cy="65" r="8"/><circle cx="40" cy="100" r="8"/></g>
+        <g fill="var(--rose)"><rect x="152" y="32" width="16" height="16" rx="3"/><rect x="152" y="87" width="16" height="16" rx="3"/></g>
+      </svg>
+      <figcaption>우리 스타일 유형과 상대 라인업 유형 사이의 매치업 이분 그래프</figcaption>
+    </figure>
+  </div>
+
+  <div class="goal">
+    <h3>최종 목적</h3>
+    <p class="q">찾아낸 맥컬러 조합의 우위가 상대 때문이 아닌지 검증한다.</p>
+    <p>이 파일은 새로운 조합을 찾는 용도가 아니라 탭 1~3 결론의 신뢰도를 높이는 검증 장치입니다. 상대 라인업 강도를 보정한 뒤에도 순위가 유지되는 조합만 최종 결론에 남깁니다.</p>
+    <ul class="ex">
+      <li>맥컬러 + A 조합의 우위는 상대 라인업 강도를 보정한 뒤에도 유지된다.</li>
+      <li>맥컬러 + C 조합의 좋은 성과는 주로 약한 상대 벤치 라인업을 만났을 때 나온 것이다.</li>
+    </ul>
+    <p class="map">근거가 되는 산출물: 보정 전후 성과 엣지 비교표, 상대 라인업 강도 변수</p>
+  </div>
+
+  <section class="block">
+    <h3>그래프 정의</h3>
+    <div class="body">
+      <h4>매치업 이분 그래프 (탐색용)</h4>
+      <p>한쪽 노드는 우리 스타일 유형 구성(탭 2의 3개 유형), 다른 쪽 노드는 상대 라인업 유형입니다. 상대 선수를 개인 단위 노드로 두면 너무 희소하므로 유형이나 팀 단위로 묶습니다.</p>
+      <h4>상대팀 단위 집계</h4>
+      <p>이 파일에는 팀 컬럼이 없지만 경기 날짜마다 상대팀이 하나이므로 날짜로 팀을 붙일 수 있습니다. 상대팀별로 맥컬러 구간의 득실과 상대 공격 지표를 집계합니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>엣지 정의</h3>
+    <div class="body">
+      <div class="tbl"><table>
+        <thead><tr><th>엣지</th><th>가중치</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>우리 유형 구성 – 상대 유형</td><td>해당 매치업 공존시간과 36분당 득실</td><td>상대 온코트 시간은 스틴트 파일의 <code>Opponents</code> 컬럼으로 계산</td></tr>
+          <tr><td>상대 라인업 강도 (노드 속성)</td><td>상대 선수들의 맥컬러 구간 per36 생산량 평균</td><td>성과 엣지 보정용 공변량</td></tr>
+        </tbody>
+      </table></div>
+      <p>상대 유형은 이 파일의 스탯으로 외국인 여부나 사용량 기준 정도의 굵은 구분만 권장합니다. 세밀한 유형은 표본이 받쳐주지 않습니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>방법론</h3>
+    <div class="body">
+      <h4>성과 엣지 보정</h4>
+      <p>탭 1의 쌍 성과가 좋은 이유가 궁합이 아니라 약한 상대 라인업을 만났기 때문일 수 있습니다. 스틴트마다 상대 라인업 강도를 계산해 회귀에 공변량으로 넣거나, 성과 귀무 모델에서 비슷한 상대 강도 구간 안에서만 득실을 섞는 방식으로 보정합니다.</p>
+      <h4>매치업 탐색</h4>
+      <p>우리 유형 구성과 상대 유형 조합별 득실을 이분 그래프로 그리되, 공존시간이 충분한 조합만 남깁니다. 결과는 통계적 결론이 아니라 "이런 매치업에서 경향이 있어 보인다"는 탐색 수준으로만 제시합니다.</p>
+      <h4>경기 부트스트랩 시 층화</h4>
+      <p>부트스트랩에서 경기를 뽑을 때 상대팀별로 층화하면 특정 상대팀 경기가 과다 추출되어 결과가 흔들리는 것을 막을 수 있습니다.</p>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>산출물</h3>
+    <div class="body">
+      <ul class="outputs">
+        <li><b>상대 라인업 강도 변수</b><span>스틴트별 값으로 만들어 탭 1 데이터에 결합.</span></li>
+        <li><b>보정 전후 성과 엣지 비교표</b><span>상대 강도 보정 후 순위가 크게 바뀌는 쌍 표시.</span></li>
+        <li><b>상대팀별 맥컬러 구간 요약</b><span>상대팀별 공존시간, 득실, 상대 공격 지표.</span></li>
+        <li><b>매치업 이분 그래프 (탐색용)</b><span>충분한 공존시간이 있는 조합만 표시.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <h3>전처리와 주의점</h3>
+    <div class="body">
+      <div class="note"><b>표본 한계</b> 상대 선수 1인당 평균 2.5경기, 중앙값 10행으로 선수 단위 비교는 사실상 불가능합니다. "맥컬러 상대로 잘하는 선수" 같은 결론은 내리지 않습니다.</div>
+      <p>상대 선수의 출전시간은 이 파일이 아니라 스틴트 파일의 <code>Opponents</code> 컬럼으로 계산합니다. 이 컬럼에는 상대 선수가 0명 또는 4명으로 기록된 스틴트가 96건 있으므로 해당 스틴트는 매치업 분석에서 제외합니다.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  수치 기준: 업로드된 CSV 4개. 36분당 득실 구간은 24경기 경기 단위 부트스트랩(2,000회) 90% 구간. 스타일 유형은 출전 80분 이상 10명 대상 Ward 클러스터링 결과.
+</footer>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(t,focus){
+    tabs.forEach(function(x){
+      var on=x===t;
+      x.setAttribute('aria-selected',on);
+      x.tabIndex=on?0:-1;
+      document.getElementById(x.getAttribute('aria-controls')).hidden=!on;
+    });
+    if(focus)t.focus();
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){select(t)});
+    t.addEventListener('keydown',function(e){
+      var k=e.key,n=null;
+      if(k==='ArrowRight')n=tabs[(i+1)%tabs.length];
+      else if(k==='ArrowLeft')n=tabs[(i-1+tabs.length)%tabs.length];
+      else if(k==='Home')n=tabs[0];
+      else if(k==='End')n=tabs[tabs.length-1];
+      if(n){e.preventDefault();select(n,true);}
+    });
+  });
+})();
+</script>
+</body>
+</html>

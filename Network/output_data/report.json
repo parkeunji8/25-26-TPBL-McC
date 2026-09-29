@@ -1,0 +1,27 @@
+{
+  "phase": "regular_season",
+  "league_stints": 4490,
+  "league_games": 126,
+  "leopards_stints": 1272,
+  "leopards_games": 36,
+  "leopards_margin_sum_stints": 180.0,
+  "leopards_margin_sum_official": 174.0,
+  "note_margin": "두 값 차이 = 무효(5대5 아님) 스틴트에서 난 득실",
+  "nodes": 137,
+  "leopards_nodes": 15,
+  "edges": {
+    "coplay": 1108,
+    "assist": 537,
+    "pair_performance": 97,
+    "mcc_ego": 14,
+    "matchup": 1405
+  },
+  "mcc_minutes": 680.3,
+  "graphml": [
+    "graphml/coplay.graphml",
+    "graphml/assist.graphml",
+    "graphml/pair_performance.graphml",
+    "graphml/mcc_ego.graphml",
+    "graphml/matchup.graphml"
+  ]
+}
