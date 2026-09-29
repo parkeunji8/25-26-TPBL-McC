@@ -5,7 +5,7 @@
 
 | 폴더 | 내용 |
 |---|---|
-| `PBP_Crawling/` | PBP 수집 및 전처리 |
+| `PBP_Crawling/` | Play-By-Play 수집 및 전처리 |
 | `GNN/` | GNN용 데이터 생성 및 분석 |
 | `Network/` | 네트워크 분석 |
 | `Cluster/` | 클러스터 분석 |
