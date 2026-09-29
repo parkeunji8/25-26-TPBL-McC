@@ -1,0 +1,16 @@
+{
+  "stints_total": 1527,
+  "stints_use": 1503,
+  "stints_use_by_phase": {
+    "regular_season": 1272,
+    "playoffs": 166,
+    "preseason": 65
+  },
+  "mcc_on_stints_use": 613,
+  "mcc_on_minutes_use": 787.8,
+  "mcc_on_minutes_regular_use": 680.3,
+  "stints_unknown_nodes": 1,
+  "unknown_player_ids": [],
+  "assist_edges": 587,
+  "games": 42
+}

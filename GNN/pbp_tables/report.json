@@ -1,0 +1,12 @@
+{
+  "games": 42,
+  "score_ok_games": 42,
+  "player_games": 1118,
+  "player_games_all_stats_match": 1118,
+  "player_games_minutes_within_1s": 1075,
+  "assist_link_rate": 0.9702,
+  "valid_time_share": 0.9966,
+  "events_off_lineup": 87,
+  "events_clock_imputed": 11,
+  "games_with_rotation_clock_imputed": []
+}
