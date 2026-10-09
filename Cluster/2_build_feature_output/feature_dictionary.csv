@@ -1,0 +1,22 @@
+﻿feature,role,group,desc,kbl_portable
+usg_pct,core,ball,코트 위 팀 플레이 중 본인이 마무리한 비율,가능
+ast_pct,core,ball,코트 위 동료 야투 성공 중 본인 어시스트 비율,가능
+tov_pct,core,ball,본인 플레이 중 턴오버 비율,가능
+three_par,core,shooting,FGA 중 3점 시도 비율,가능
+ft_rate,core,shooting,FGA 대비 자유투 시도,가능
+paint_pts_share,core,shooting,득점 중 페인트 득점 비중,확인 필요
+orb_pct,core,rebound,공격 리바운드 점유율,가능
+drb_pct,core,rebound,수비 리바운드 점유율,가능
+stl_pct,core,defense,상대 포제션 대비 스틸,가능
+blk_pct,core,defense,상대 2점 시도 대비 블록,가능
+pf_per36,core,defense,36분당 파울,가능
+fb_pts_share,aux,context,득점 중 속공 득점 비중,확인 필요
+sc_pts_share,aux,context,득점 중 세컨드찬스 득점 비중,확인 필요
+shot_self_jumper_share,aux,shot_type,FGA 중 self_jumper 비중,확인 필요
+shot_catch_jumper_share,aux,shot_type,FGA 중 catch_jumper 비중,확인 필요
+shot_drive_share,aux,shot_type,FGA 중 drive 비중,확인 필요
+shot_layup_share,aux,shot_type,FGA 중 layup 비중,확인 필요
+shot_rim_finish_share,aux,shot_type,FGA 중 rim_finish 비중,확인 필요
+shot_putback_share,aux,shot_type,FGA 중 putback 비중,확인 필요
+shot_floater_share,aux,shot_type,FGA 중 floater 비중,확인 필요
+shot_post_hook_share,aux,shot_type,FGA 중 post_hook 비중,확인 필요
